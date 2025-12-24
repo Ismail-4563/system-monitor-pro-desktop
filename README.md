@@ -1,8 +1,6 @@
 # System Monitor Pro Desktop
 
-[![GitHub stars](https://img.shields.io/github/stars/domoy77/system-monitor-pro-desktop?style=social)](https://github.com/domoy77/cyberpunk-solstice-bot/stargazers)
-[![GitHub forks](https://img.shields.io/github/forks/domoy77/system-monitor-pro-desktop?style=social)](https://github.com/domoy77/cyberpunk-solstice-bot/network/members)
-[![GitHub issues](https://img.shields.io/github/issues/domoy77/system-monitor-pro-desktop)](https://github.com/domoy77/cyberpunk-solstice-bot/issues)
+[![GitHub stars](https://img.shields.io/github/stars/domoy77/system-monitor-pro-desktop?style=social)](https://github.com/domoy77/system-monitor-pro-desktop/stargazers)
 ![System Monitor Pro](https://img.shields.io/badge/System-Monitor%20Pro-blue)
 ![Electron](https://img.shields.io/badge/Electron-28.0.0-47848F)
 ![Platform](https://img.shields.io/badge/Platform-Windows%20%7C%20macOS%20%7C%20Linux-success)
