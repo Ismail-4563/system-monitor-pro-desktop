@@ -27,16 +27,16 @@
   "author": {
     "name": "Domoy",
     "email": "domoy@gmail.com",
-    "url": "https://github.com/domoy"
+    "url": "https://github.com/domoy77"
   },
   "license": "MIT",
-  "homepage": "https://github.com/domoy/system-monitor-pro-desktop",
+  "homepage": "https://github.com/domoy77/system-monitor-pro-desktop",
   "repository": {
     "type": "git",
-    "url": "https://github.com/domoy/system-monitor-pro-desktop.git"
+    "url": "https://github.com/domoy77/system-monitor-pro-desktop.git"
   },
   "bugs": {
-    "url": "https://github.com/domoy/system-monitor-pro-desktop/issues"
+    "url": "https://github.com/domoy77/system-monitor-pro-desktop/issues"
   },
   "dependencies": {
     "chalk": "^5.6.2",
