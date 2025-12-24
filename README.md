@@ -50,3 +50,6 @@ npm start
 
 # Run with dev tools
 npm run dev
+
+# Quit
+Ctrl + C
