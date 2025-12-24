@@ -1,0 +1,1643 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>System Monitor Pro Desktop</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #4361ee;
+            --secondary: #3a0ca3;
+            --success: #4cc9f0;
+            --warning: #f72585;
+            --danger: #ef233c;
+            --dark: #2b2d42;
+            --light: #f8f9fa;
+            --gray: #adb5bd;
+            --electron-blue: #47848f;
+            --electron-green: #21c55d;
+        }
+        
+        * { 
+            margin: 0; 
+            padding: 0; 
+            box-sizing: border-box; 
+            font-family: 'Segoe UI', 'Roboto', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+            color: var(--light);
+            min-height: 100vh;
+            padding: 20px;
+            overflow-x: hidden;
+        }
+        
+        /* Electron Title Bar (for frameless windows) */
+        .electron-titlebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 32px;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(10px);
+            -webkit-app-region: drag;
+            display: flex;
+            align-items: center;
+            padding: 0 16px;
+            z-index: 10000;
+            display: none; /* Hidden by default, shown in Electron */
+        }
+        
+        .electron-title {
+            color: white;
+            font-size: 14px;
+            margin-left: 10px;
+        }
+        
+        .electron-controls {
+            margin-left: auto;
+            display: flex;
+            -webkit-app-region: no-drag;
+        }
+        
+        .electron-btn {
+            width: 46px;
+            height: 32px;
+            border: none;
+            background: transparent;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s;
+        }
+        
+        .electron-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+        
+        .electron-btn.close:hover {
+            background: #ef233c;
+        }
+        
+        /* Electron Badge */
+        .electron-badge {
+            position: fixed;
+            bottom: 15px;
+            left: 15px;
+            background: rgba(67, 97, 238, 0.9);
+            color: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        /* Electron Context Menu */
+        .electron-context-menu {
+            position: fixed;
+            background: rgba(30, 30, 30, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 8px 0;
+            min-width: 180px;
+            z-index: 10001;
+            display: none;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+        
+        .electron-context-item {
+            padding: 10px 20px;
+            color: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 14px;
+            transition: background 0.2s;
+        }
+        
+        .electron-context-item:hover {
+            background: rgba(67, 97, 238, 0.5);
+        }
+        
+        .electron-context-divider {
+            height: 1px;
+            background: rgba(255, 255, 255, 0.1);
+            margin: 5px 0;
+        }
+        
+        .container { 
+            max-width: 1400px; 
+            margin: 0 auto; 
+            padding-top: 20px;
+        }
+        
+        /* Header */
+        .header {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 25px 40px;
+            margin-bottom: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            text-align: center;
+            position: relative;
+        }
+        
+        .electron-header-badge {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: var(--electron-green);
+            color: white;
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            background: linear-gradient(90deg, #4cc9f0, #4361ee);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+        }
+        
+        .header p { 
+            color: var(--gray); 
+            font-size: 1.1rem;
+        }
+        
+        /* Stats Bar */
+        .stats-bar {
+            display: flex;
+            justify-content: space-between;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px 25px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        
+        .stat-item {
+            text-align: center;
+            flex: 1;
+            min-width: 150px;
+        }
+        
+        .stat-value {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: var(--success);
+        }
+        
+        .stat-label {
+            font-size: 0.9rem;
+            color: var(--gray);
+            margin-top: 5px;
+        }
+        
+        /* Electron Controls Bar */
+        .electron-controls-bar {
+            background: rgba(67, 97, 238, 0.1);
+            padding: 15px 25px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(67, 97, 238, 0.3);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            display: none; /* Hidden by default, shown in Electron */
+        }
+        
+        .electron-controls-left {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .electron-controls-right {
+            display: flex;
+            gap: 10px;
+        }
+        
+        /* Main Grid */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+        
+        /* Cards */
+        .card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            position: relative;
+        }
+        
+        .card:hover { 
+            transform: translateY(-5px); 
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+        
+        .card.electron-featured {
+            border: 2px solid var(--electron-blue);
+            background: rgba(71, 132, 143, 0.1);
+        }
+        
+        .card.cpu { border-left: 5px solid #ff7e5f; }
+        .card.memory { border-left: 5px solid #4ecdc4; }
+        .card.disk { border-left: 5px solid #ffe66d; }
+        .card.network { border-left: 5px solid #9d65c9; }
+        .card.processes { border-left: 5px solid #f72585; }
+        .card.system { border-left: 5px solid #4361ee; }
+        
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .card-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.4rem;
+            font-weight: 600;
+        }
+        
+        .electron-card-badge {
+            background: var(--electron-blue);
+            color: white;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+            margin-left: 10px;
+        }
+        
+        .card-value {
+            font-size: 3.5rem;
+            font-weight: bold;
+            margin: 20px 0;
+            text-align: center;
+        }
+        
+        .progress-container {
+            background: rgba(255, 255, 255, 0.2);
+            height: 12px;
+            border-radius: 10px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+        
+        .progress-bar {
+            height: 100%;
+            border-radius: 10px;
+            transition: width 1s ease-in-out;
+        }
+        
+        .cpu-progress { background: linear-gradient(90deg, #ff7e5f, #feb47b); }
+        .mem-progress { background: linear-gradient(90deg, #4ecdc4, #44a08d); }
+        .disk-progress { background: linear-gradient(90deg, #ffe66d, #ffb347); }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .stat-item-small {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 15px;
+            border-radius: 12px;
+            text-align: center;
+        }
+        
+        .stat-item-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: white;
+        }
+        
+        .stat-item-label {
+            font-size: 0.9rem;
+            color: var(--gray);
+            margin-top: 5px;
+        }
+        
+        /* CPU Cores */
+        .cores-container {
+            margin-top: 15px;
+        }
+        
+        .cores-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .core-item {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 10px;
+            border-radius: 8px;
+            text-align: center;
+            transition: transform 0.2s;
+        }
+        
+        .core-item:hover {
+            transform: scale(1.05);
+        }
+        
+        .core-id {
+            font-size: 0.8rem;
+            color: var(--gray);
+            margin-bottom: 5px;
+        }
+        
+        .core-value {
+            font-size: 1.1rem;
+            font-weight: bold;
+        }
+        
+        /* System Info */
+        .info-list {
+            margin-top: 15px;
+        }
+        
+        .info-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .info-label {
+            color: var(--gray);
+        }
+        
+        .info-value {
+            font-weight: 600;
+        }
+        
+        /* Electron Notifications */
+        .electron-notification {
+            position: fixed;
+            bottom: 80px;
+            right: 20px;
+            background: rgba(30, 30, 30, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 15px 20px;
+            min-width: 300px;
+            max-width: 400px;
+            z-index: 9998;
+            transform: translateY(100px);
+            opacity: 0;
+            transition: transform 0.3s, opacity 0.3s;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+        
+        .electron-notification.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+        
+        .notification-title {
+            color: var(--success);
+            font-weight: bold;
+            margin-bottom: 5px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .notification-message {
+            color: var(--light);
+            font-size: 14px;
+        }
+        
+        /* Footer */
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+            color: var(--gray);
+        }
+        
+        .update-time {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 10px 20px;
+            border-radius: 10px;
+            display: inline-block;
+            margin-top: 10px;
+        }
+        
+        /* Electron Buttons */
+        .electron-btn-primary {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: background 0.3s, transform 0.2s;
+        }
+        
+        .electron-btn-primary:hover {
+            background: var(--secondary);
+            transform: translateY(-2px);
+        }
+        
+        .electron-btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: background 0.3s;
+        }
+        
+        .electron-btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .dashboard-grid { grid-template-columns: 1fr; }
+            .stats-bar { flex-direction: column; align-items: center; }
+            .stat-item { min-width: 100%; margin-bottom: 10px; }
+            .cores-grid { grid-template-columns: repeat(4, 1fr); }
+            .electron-titlebar { display: none !important; }
+            .electron-controls-bar { flex-direction: column; }
+        }
+        
+        /* Dark/Light theme support */
+        @media (prefers-color-scheme: light) {
+            body {
+                background: linear-gradient(135deg, #e3f2fd, #f3e5f5, #f1f8e9);
+                color: var(--dark);
+            }
+            
+            .card {
+                background: rgba(255, 255, 255, 0.9);
+                color: var(--dark);
+            }
+            
+            .stat-item-value, .card-value {
+                color: var(--dark);
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Electron Title Bar (for frameless windows) -->
+    <div class="electron-titlebar" id="electronTitleBar">
+        <div class="electron-title">System Monitor Pro Desktop</div>
+        <div class="electron-controls">
+            <button class="electron-btn" id="minimizeBtn">─</button>
+            <button class="electron-btn" id="maximizeBtn">□</button>
+            <button class="electron-btn close" id="closeBtn">✕</button>
+        </div>
+    </div>
+    
+    <!-- Electron Context Menu -->
+    <div class="electron-context-menu" id="electronContextMenu">
+        <div class="electron-context-item" onclick="electronRefresh()">
+            <i class="fas fa-redo"></i> Refresh
+        </div>
+        <div class="electron-context-item" onclick="electronExport('json')">
+            <i class="fas fa-file-export"></i> Export JSON
+        </div>
+        <div class="electron-context-item" onclick="electronExport('csv')">
+            <i class="fas fa-file-csv"></i> Export CSV
+        </div>
+        <div class="electron-context-divider"></div>
+        <div class="electron-context-item" onclick="electronShowSettings()">
+            <i class="fas fa-cog"></i> Settings
+        </div>
+        <div class="electron-context-item" onclick="electronToggleMonitoring()">
+            <i class="fas fa-play-circle"></i> Toggle Monitoring
+        </div>
+        <div class="electron-context-divider"></div>
+        <div class="electron-context-item" onclick="electronDevTools()">
+            <i class="fas fa-code"></i> Developer Tools
+        </div>
+        <div class="electron-context-item" onclick="electronReload()">
+            <i class="fas fa-sync-alt"></i> Reload App
+        </div>
+    </div>
+    
+    <!-- Electron Notification -->
+    <div class="electron-notification" id="electronNotification">
+        <div class="notification-title" id="notificationTitle">
+            <i class="fas fa-info-circle"></i> Notification
+        </div>
+        <div class="notification-message" id="notificationMessage">
+            Welcome to System Monitor Pro Desktop!
+        </div>
+    </div>
+    
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <div class="electron-header-badge" id="electronBadge">
+                <i class="fab fa-electron"></i> DESKTOP EDITION
+            </div>
+            <h1>
+                <i class="fas fa-rocket"></i>
+                <span>System Monitor Pro Desktop</span>
+            </h1>
+            <p>Professional Desktop System Monitoring with Electron Integration</p>
+        </div>
+        
+        <!-- Electron Controls Bar -->
+        <div class="electron-controls-bar" id="electronControlsBar">
+            <div class="electron-controls-left">
+                <button class="electron-btn-primary" onclick="electronRefresh()">
+                    <i class="fas fa-redo"></i> Refresh
+                </button>
+                <button class="electron-btn-primary" onclick="electronToggleMonitoring()" id="monitoringToggleBtn">
+                    <i class="fas fa-play-circle"></i> Start Monitoring
+                </button>
+                <button class="electron-btn-secondary" onclick="electronShowSettings()">
+                    <i class="fas fa-cog"></i> Settings
+                </button>
+            </div>
+            <div class="electron-controls-right">
+                <button class="electron-btn-secondary" onclick="electronExport('json')">
+                    <i class="fas fa-file-export"></i> Export JSON
+                </button>
+                <button class="electron-btn-secondary" onclick="electronExport('csv')">
+                    <i class="fas fa-file-csv"></i> Export CSV
+                </button>
+                <button class="electron-btn-secondary" onclick="electronTakeScreenshot()">
+                    <i class="fas fa-camera"></i> Screenshot
+                </button>
+            </div>
+        </div>
+        
+        <!-- Stats Bar -->
+        <div class="stats-bar">
+            <div class="stat-item">
+                <div class="stat-value" id="update-count">0</div>
+                <div class="stat-label">Updates</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="system-uptime">0h 0m</div>
+                <div class="stat-label">System Uptime</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="monitor-uptime">0h 0m</div>
+                <div class="stat-label">Monitor Uptime</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="process-count">0</div>
+                <div class="stat-label">Processes</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="electron-status">Online</div>
+                <div class="stat-label">App Status</div>
+            </div>
+        </div>
+        
+        <!-- Main Dashboard Grid -->
+        <div class="dashboard-grid">
+            <!-- CPU Card -->
+            <div class="card cpu">
+                <div class="card-header">
+                    <div class="card-title">
+                        <i class="fas fa-microchip"></i>
+                        <span>⚡ CPU Information</span>
+                        <span class="electron-card-badge">Electron Enhanced</span>
+                    </div>
+                    <div class="card-status" id="cpu-status">Normal</div>
+                </div>
+                <div class="card-value" id="cpu-value">0%</div>
+                <div class="progress-container">
+                    <div class="progress-bar cpu-progress" id="cpu-progress" style="width: 0%"></div>
+                </div>
+                
+                <div class="stats-grid">
+                    <div class="stat-item-small">
+                        <div class="stat-item-value" id="cpu-cores">0</div>
+                        <div class="stat-item-label">Cores</div>
+                    </div>
+                    <div class="stat-item-small">
+                        <div class="stat-item-value" id="cpu-user">0%</div>
+                        <div class="stat-item-label">User</div>
+                    </div>
+                    <div class="stat-item-small">
+                        <div class="stat-item-value" id="cpu-system">0%</div>
+                        <div class="stat-item-label">System</div>
+                    </div>
+                    <div class="stat-item-small">
+                        <div class="stat-item-value" id="cpu-temp">N/A</div>
+                        <div class="stat-item-label">Temperature</div>
+                    </div>
+                </div>
+                
+                <div class="cores-container">
+                    <div style="margin-bottom: 10px; color: var(--gray);">Per-core Usage:</div>
+                    <div class="cores-grid" id="cores-grid">
+                        <!-- Cores will be populated by JavaScript -->
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Memory Card -->
+            <div class="card memory">
+                <div class="card-header">
+                    <div class="card-title">
+                        <i class="fas fa-memory"></i>
+                        <span>💾 Memory</span>
+                        <span class="electron-card-badge">Real-time</span>
+                    </div>
+                    <div class="card-status" id="memory-status">Normal</div>
+                </div>
+                <div class="card-value" id="memory-value">0%</div>
+                <div class="progress-container">
+                    <div class="progress-bar mem-progress" id="memory-progress" style="width: 0%"></div>
+                </div>
+                
+                <div class="stats-grid">
+                    <div class="stat-item-small">
+                        <div class="stat-item-value" id="memory-total">0 GB</div>
+                        <div class="stat-item-label">Total</div>
+                    </div>
+                    <div class="stat-item-small">
+                        <div class="stat-item-value" id="memory-used">0 GB</div>
+                        <div class="stat-item-label">Used</div>
+                    </div>
+                    <div class="stat-item-small">
+                        <div class="stat-item-value" id="memory-free">0 GB</div>
+                        <div class="stat-item-label">Free</div>
+                    </div>
+                    <div class="stat-item-small">
+                        <div class="stat-item-value" id="memory-available">0 GB</div>
+                        <div class="stat-item-label">Available</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Disk Card -->
+            <div class="card disk">
+                <div class="card-header">
+                    <div class="card-title">
+                        <i class="fas fa-hdd"></i>
+                        <span>💿 Disk Storage</span>
+                        <span class="electron-card-badge">Electron FS</span>
+                    </div>
+                    <div class="card-status" id="disk-status">Normal</div>
+                </div>
+                <div class="card-value" id="disk-value">0%</div>
+                <div class="progress-container">
+                    <div class="progress-bar disk-progress" id="disk-progress" style="width: 0%"></div>
+                </div>
+                
+                <div class="stats-grid">
+                    <div class="stat-item-small">
+                        <div class="stat-item-value" id="disk-total">0 GB</div>
+                        <div class="stat-item-label">Total</div>
+                    </div>
+                    <div class="stat-item-small">
+                        <div class="stat-item-value" id="disk-used">0 GB</div>
+                        <div class="stat-item-label">Used</div>
+                    </div>
+                    <div class="stat-item-small">
+                        <div class="stat-item-value" id="disk-free">0 GB</div>
+                        <div class="stat-item-label">Free</div>
+                    </div>
+                    <div class="stat-item-small">
+                        <div class="stat-item-value" id="disk-mount">/</div>
+                        <div class="stat-item-label">Mount</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Network Card -->
+            <div class="card network">
+                <div class="card-header">
+                    <div class="card-title">
+                        <i class="fas fa-network-wired"></i>
+                        <span>🌐 Network</span>
+                        <span class="electron-card-badge">Live Data</span>
+                    </div>
+                    <div class="card-status" id="network-status">Active</div>
+                </div>
+                
+                <div class="info-list">
+                    <div class="info-item">
+                        <span class="info-label">Interface:</span>
+                        <span class="info-value" id="network-interface">eth0</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Download Speed:</span>
+                        <span class="info-value" id="network-rx">0 MB/s</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Upload Speed:</span>
+                        <span class="info-value" id="network-tx">0 MB/s</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Download Total:</span>
+                        <span class="info-value" id="network-rx-total">0 MB</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Upload Total:</span>
+                        <span class="info-value" id="network-tx-total">0 MB</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Processes Card -->
+            <div class="card processes">
+                <div class="card-header">
+                    <div class="card-title">
+                        <i class="fas fa-tasks"></i>
+                        <span>📊 Processes</span>
+                        <span class="electron-card-badge">System API</span>
+                    </div>
+                </div>
+                
+                <div class="info-list">
+                    <div class="info-item">
+                        <span class="info-label">Total Processes:</span>
+                        <span class="info-value" id="process-total">0</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Running:</span>
+                        <span class="info-value" id="process-running">0</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Sleeping:</span>
+                        <span class="info-value" id="process-sleeping">0</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Last Updated:</span>
+                        <span class="info-value" id="last-update">-</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- System Information Card -->
+            <div class="card system electron-featured">
+                <div class="card-header">
+                    <div class="card-title">
+                        <i class="fas fa-server"></i>
+                        <span>🖥️ System Information</span>
+                        <span class="electron-card-badge">Electron Powered</span>
+                    </div>
+                </div>
+                
+                <div class="info-list">
+                    <div class="info-item">
+                        <span class="info-label">Hostname:</span>
+                        <span class="info-value" id="system-hostname">-</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">OS:</span>
+                        <span class="info-value" id="system-os">-</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Kernel:</span>
+                        <span class="info-value" id="system-kernel">-</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Architecture:</span>
+                        <span class="info-value" id="system-arch">-</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Platform:</span>
+                        <span class="info-value" id="system-platform">-</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Electron Version:</span>
+                        <span class="info-value" id="electron-version">-</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Node.js Version:</span>
+                        <span class="info-value" id="node-version">-</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Electron Features Card -->
+            <div class="card electron-featured">
+                <div class="card-header">
+                    <div class="card-title">
+                        <i class="fab fa-electron"></i>
+                        <span>⚡ Electron Features</span>
+                    </div>
+                </div>
+                
+                <div class="info-list">
+                    <div class="info-item">
+                        <span class="info-label">App Version:</span>
+                        <span class="info-value" id="app-version">1.0.0</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Running Mode:</span>
+                        <span class="info-value" id="running-mode">Desktop</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Data Source:</span>
+                        <span class="info-value" id="data-source">Direct IPC</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Auto Refresh:</span>
+                        <span class="info-value" id="auto-refresh-status">ON</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Theme Mode:</span>
+                        <span class="info-value" id="theme-mode">Dark</span>
+                    </div>
+                </div>
+                
+                <div style="margin-top: 20px; display: flex; gap: 10px; flex-wrap: wrap;">
+                    <button class="electron-btn-primary" onclick="electronTakeScreenshot()" style="flex: 1;">
+                        <i class="fas fa-camera"></i> Screenshot
+                    </button>
+                    <button class="electron-btn-secondary" onclick="electronOpenLogs()" style="flex: 1;">
+                        <i class="fas fa-file-alt"></i> View Logs
+                    </button>
+                    <button class="electron-btn-secondary" onclick="electronOpenDataFolder()" style="flex: 1;">
+                        <i class="fas fa-folder-open"></i> Data Folder
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Footer -->
+        <div class="footer">
+            <p>System Monitor Pro Desktop v2.0 • Professional Desktop Monitoring with Electron</p>
+            <div class="update-time">
+                <i class="fas fa-sync-alt"></i> Auto-update every <span id="update-interval">3</span> seconds
+                <br>
+                <small>Next update in: <span id="next-update">3</span>s • Mode: <span id="app-mode">Desktop</span></small>
+            </div>
+            <div style="margin-top: 20px; display: flex; gap: 10px; flex-wrap: wrap; justify-content: center;">
+                <button class="electron-btn-primary" onclick="refreshData()" id="refresh-btn">
+                    <i class="fas fa-redo"></i> Refresh Now
+                </button>
+                <button class="electron-btn-secondary" onclick="toggleAutoRefresh()" id="auto-refresh-btn">
+                    <i class="fas fa-play-circle"></i> Auto-refresh: ON
+                </button>
+                <button class="electron-btn-primary" onclick="electronExport('json')" id="export-json-btn">
+                    <i class="fas fa-file-export"></i> Export JSON
+                </button>
+                <button class="electron-btn-secondary" onclick="electronShowSettings()" id="settings-btn">
+                    <i class="fas fa-cog"></i> Settings
+                </button>
+                <button class="electron-btn-secondary" onclick="electronAbout()" id="about-btn">
+                    <i class="fas fa-info-circle"></i> About
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Electron Badge -->
+    <div class="electron-badge" id="floatingElectronBadge">
+        <i class="fab fa-electron"></i>
+        <span>Electron Desktop App</span>
+        <i class="fas fa-circle" style="color: #21c55d; font-size: 8px;"></i>
+    </div>
+    
+    <!-- ==================== ELECTRON INTEGRATION SCRIPT ==================== -->
+    <script>
+        // Global variables
+        let autoRefresh = true;
+        let refreshInterval;
+        let updateFrequency = 3000;
+        let isElectron = false;
+        let electronAPI = null;
+        let monitoringActive = true;
+        
+        // ==================== ELECTRON DETECTION & SETUP ====================
+        function detectEnvironment() {
+            // Check if running in Electron
+            if (typeof window !== 'undefined' && window.process && window.process.type === 'renderer') {
+                isElectron = true;
+                console.log('✅ Running in Electron renderer process');
+                
+                // Get Electron API
+                try {
+                    electronAPI = require('electron');
+                    console.log('✅ Electron API loaded successfully');
+                    initElectronFeatures();
+                } catch (error) {
+                    console.error('❌ Failed to load Electron API:', error);
+                    isElectron = false;
+                }
+            } else {
+                console.log('🌐 Running in web browser');
+                isElectron = false;
+            }
+            
+            updateUIForEnvironment();
+        }
+        
+        function initElectronFeatures() {
+            if (!isElectron || !electronAPI) return;
+            
+            const { ipcRenderer } = electronAPI;
+            
+            // Setup IPC listeners
+            setupElectronIPC();
+            
+            // Setup window controls
+            setupWindowControls();
+            
+            // Setup context menu
+            setupContextMenu();
+            
+            // Request initial data
+            ipcRenderer.send('get-current-data');
+            ipcRenderer.send('get-monitor-status');
+            
+            // Show welcome notification
+            showElectronNotification('Welcome to System Monitor Pro Desktop!', 'success');
+            
+            // Update Electron-specific UI
+            document.getElementById('electron-status').textContent = 'Connected';
+            document.getElementById('electron-status').style.color = '#21c55d';
+            document.getElementById('app-mode').textContent = 'Desktop';
+            document.getElementById('running-mode').textContent = 'Desktop App';
+            document.getElementById('data-source').textContent = 'Direct IPC';
+            
+            // Try to get Electron and Node versions
+            try {
+                document.getElementById('electron-version').textContent = process.versions.electron || 'Unknown';
+                document.getElementById('node-version').textContent = process.versions.node || 'Unknown';
+            } catch (e) {
+                console.log('Could not get version info:', e);
+            }
+        }
+        
+        function setupElectronIPC() {
+            if (!isElectron || !electronAPI) return;
+            
+            const { ipcRenderer } = electronAPI;
+            
+            // Listen for data updates from main process
+            ipcRenderer.on('system-data-update', (event, data) => {
+                console.log('📡 Received real-time data update via IPC');
+                updateDashboard(data);
+            });
+            
+            // Listen for manual refresh requests
+            ipcRenderer.on('manual-refresh', () => {
+                console.log('🔄 Manual refresh requested from main process');
+                refreshData();
+            });
+            
+            // Listen for export requests
+            ipcRenderer.on('export-data', (event, format) => {
+                console.log(`📤 Export requested: ${format}`);
+                electronExport(format);
+            });
+            
+            // Listen for settings updates
+            ipcRenderer.on('settings-updated', (event, settings) => {
+                console.log('⚙️ Settings updated:', settings);
+                if (settings.updateInterval) {
+                    updateFrequency = settings.updateInterval;
+                    document.getElementById('update-interval').textContent = 
+                        Math.round(settings.updateInterval / 1000);
+                    if (autoRefresh) {
+                        startAutoRefresh();
+                    }
+                }
+            });
+            
+            // Listen for theme changes
+            ipcRenderer.on('theme-changed', (event, isDarkMode) => {
+                console.log('🎨 Theme changed:', isDarkMode ? 'Dark' : 'Light');
+                document.getElementById('theme-mode').textContent = isDarkMode ? 'Dark' : 'Light';
+            });
+            
+            // Listen for toggle updates
+            ipcRenderer.on('toggle-pause-updates', (event, paused) => {
+                if (paused) {
+                    clearInterval(refreshInterval);
+                    document.getElementById('auto-refresh-btn').innerHTML = 
+                        '<i class="fas fa-pause-circle"></i> Updates Paused';
+                    document.getElementById('auto-refresh-btn').style.background = '#f72585';
+                    document.getElementById('auto-refresh-status').textContent = 'PAUSED';
+                } else {
+                    startAutoRefresh();
+                    document.getElementById('auto-refresh-btn').innerHTML = 
+                        '<i class="fas fa-play-circle"></i> Auto-refresh: ON';
+                    document.getElementById('auto-refresh-btn').style.background = '#4361ee';
+                    document.getElementById('auto-refresh-status').textContent = 'ON';
+                }
+            });
+            
+            // Listen for current data response
+            ipcRenderer.on('current-data-response', (event, data) => {
+                console.log('📊 Received initial data from main process');
+                updateDashboard(data);
+            });
+            
+            // Listen for monitor status response
+            ipcRenderer.on('monitor-status-response', (event, status) => {
+                console.log('📈 Monitor status:', status);
+                monitoringActive = status.isRunning;
+                updateMonitoringButton();
+            });
+            
+            // Listen for monitoring toggled response
+            ipcRenderer.on('monitoring-toggled', (event, isRunning) => {
+                monitoringActive = isRunning;
+                updateMonitoringButton();
+                showElectronNotification(
+                    `Monitoring ${isRunning ? 'started' : 'stopped'}`,
+                    isRunning ? 'success' : 'warning'
+                );
+            });
+            
+            // Listen for data exported response
+            ipcRenderer.on('data-exported', (event, filePath) => {
+                if (filePath) {
+                    showElectronNotification(
+                        `Data exported successfully to:<br>${filePath}`,
+                        'success',
+                        5000
+                    );
+                } else {
+                    showElectronNotification('Failed to export data', 'error');
+                }
+            });
+        }
+        
+        function setupWindowControls() {
+            if (!isElectron) return;
+            
+            const { ipcRenderer } = electronAPI;
+            
+            // Show title bar for frameless windows
+            document.getElementById('electronTitleBar').style.display = 'flex';
+            
+            // Setup control buttons
+            document.getElementById('minimizeBtn').addEventListener('click', () => {
+                ipcRenderer.send('window-minimize');
+            });
+            
+            document.getElementById('maximizeBtn').addEventListener('click', () => {
+                ipcRenderer.send('window-maximize');
+            });
+            
+            document.getElementById('closeBtn').addEventListener('click', () => {
+                ipcRenderer.send('window-close');
+            });
+            
+            // Show Electron controls bar
+            document.getElementById('electronControlsBar').style.display = 'flex';
+        }
+        
+        function setupContextMenu() {
+            if (!isElectron) return;
+            
+            const contextMenu = document.getElementById('electronContextMenu');
+            
+            // Show context menu on right-click
+            document.addEventListener('contextmenu', (e) => {
+                e.preventDefault();
+                
+                // Position the menu
+                contextMenu.style.left = e.pageX + 'px';
+                contextMenu.style.top = e.pageY + 'px';
+                contextMenu.style.display = 'block';
+                
+                // Hide menu when clicking elsewhere
+                setTimeout(() => {
+                    document.addEventListener('click', function hideContextMenu() {
+                        contextMenu.style.display = 'none';
+                        document.removeEventListener('click', hideContextMenu);
+                    });
+                }, 100);
+            });
+        }
+        
+        function updateUIForEnvironment() {
+            if (isElectron) {
+                // Show Electron-specific elements
+                document.getElementById('electronBadge').style.display = 'flex';
+                document.getElementById('floatingElectronBadge').style.display = 'flex';
+                
+                // Update button texts
+                document.getElementById('refresh-btn').innerHTML = '<i class="fas fa-redo"></i> Refresh (Electron)';
+                document.getElementById('export-json-btn').innerHTML = '<i class="fas fa-file-export"></i> Export via Electron';
+            } else {
+                // Hide Electron-specific elements
+                document.getElementById('electronBadge').style.display = 'none';
+                document.getElementById('floatingElectronBadge').style.display = 'none';
+                document.getElementById('electronControlsBar').style.display = 'none';
+                
+                // Update UI for web mode
+                document.getElementById('app-mode').textContent = 'Web Browser';
+                document.getElementById('running-mode').textContent = 'Web Browser';
+                document.getElementById('data-source').textContent = 'HTTP API';
+                document.getElementById('electron-version').textContent = 'N/A';
+                document.getElementById('node-version').textContent = 'N/A';
+            }
+        }
+        
+        // ==================== ELECTRON FUNCTIONS ====================
+        function electronRefresh() {
+            if (isElectron && electronAPI) {
+                electronAPI.ipcRenderer.send('get-current-data');
+                showElectronNotification('Refreshing data...', 'info');
+            } else {
+                refreshData();
+            }
+        }
+        
+        function electronExport(format = 'json') {
+            if (isElectron && electronAPI) {
+                electronAPI.ipcRenderer.send('export-data', format);
+                showElectronNotification(`Exporting as ${format.toUpperCase()}...`, 'info');
+            } else {
+                // Fallback for web
+                const data = getCurrentDataForExport();
+                const dataStr = format === 'json' 
+                    ? JSON.stringify(data, null, 2)
+                    : convertToCSV(data);
+                
+                const blob = new Blob([dataStr], { type: 'text/plain' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `system-monitor-${new Date().toISOString().split('T')[0]}.${format}`;
+                a.click();
+                URL.revokeObjectURL(url);
+                
+                showElectronNotification(`Data exported as ${format.toUpperCase()}`, 'success');
+            }
+        }
+        
+        function electronShowSettings() {
+            if (isElectron && electronAPI) {
+                electronAPI.ipcRenderer.send('show-settings');
+            } else {
+                alert('Settings are only available in the Electron desktop app.');
+            }
+        }
+        
+        function electronToggleMonitoring() {
+            if (isElectron && electronAPI) {
+                electronAPI.ipcRenderer.send('toggle-monitoring');
+            } else {
+                alert('Monitoring control is only available in the Electron desktop app.');
+            }
+        }
+        
+        function electronTakeScreenshot() {
+            if (isElectron && electronAPI) {
+                electronAPI.ipcRenderer.send('take-screenshot');
+                showElectronNotification('Taking screenshot...', 'info');
+            } else {
+                // Fallback for web (html2canvas library would be needed)
+                alert('Screenshot feature is only available in the Electron desktop app.');
+            }
+        }
+        
+        function electronOpenLogs() {
+            if (isElectron && electronAPI) {
+                electronAPI.ipcRenderer.send('open-logs-folder');
+            } else {
+                alert('Logs are only available in the Electron desktop app.');
+            }
+        }
+        
+        function electronOpenDataFolder() {
+            if (isElectron && electronAPI) {
+                electronAPI.ipcRenderer.send('open-data-folder');
+            } else {
+                alert('Data folder is only available in the Electron desktop app.');
+            }
+        }
+        
+        function electronAbout() {
+            if (isElectron && electronAPI) {
+                electronAPI.ipcRenderer.send('show-about');
+            } else {
+                alert('System Monitor Pro Desktop v2.0\nWeb Browser Mode');
+            }
+        }
+        
+        function electronDevTools() {
+            if (isElectron && electronAPI) {
+                electronAPI.ipcRenderer.send('open-devtools');
+            }
+        }
+        
+        function electronReload() {
+            if (isElectron && electronAPI) {
+                electronAPI.ipcRenderer.send('reload-app');
+            } else {
+                window.location.reload();
+            }
+        }
+        
+        function showElectronNotification(message, type = 'info', duration = 3000) {
+            const notification = document.getElementById('electronNotification');
+            const title = document.getElementById('notificationTitle');
+            const msg = document.getElementById('notificationMessage');
+            
+            // Set icon and color based on type
+            let icon = 'fas fa-info-circle';
+            let color = '#4361ee';
+            
+            switch(type) {
+                case 'success':
+                    icon = 'fas fa-check-circle';
+                    color = '#21c55d';
+                    break;
+                case 'warning':
+                    icon = 'fas fa-exclamation-triangle';
+                    color = '#f59e0b';
+                    break;
+                case 'error':
+                    icon = 'fas fa-times-circle';
+                    color = '#ef233c';
+                    break;
+                case 'info':
+                default:
+                    icon = 'fas fa-info-circle';
+                    color = '#4361ee';
+            }
+            
+            title.innerHTML = `<i class="${icon}"></i> ${type.charAt(0).toUpperCase() + type.slice(1)}`;
+            title.style.color = color;
+            msg.innerHTML = message;
+            
+            // Show notification
+            notification.classList.add('show');
+            
+            // Auto-hide after duration
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, duration);
+        }
+        
+        function updateMonitoringButton() {
+            const btn = document.getElementById('monitoringToggleBtn');
+            if (monitoringActive) {
+                btn.innerHTML = '<i class="fas fa-pause-circle"></i> Stop Monitoring';
+                btn.style.background = '#f72585';
+            } else {
+                btn.innerHTML = '<i class="fas fa-play-circle"></i> Start Monitoring';
+                btn.style.background = '#4361ee';
+            }
+        }
+        
+        // ==================== DASHBOARD FUNCTIONS ====================
+        function updateDashboard(data) {
+            if (!data) {
+                console.error('No data received');
+                return;
+            }
+            
+            console.log('📊 Updating dashboard with data');
+            
+            // Update stats bar
+            document.getElementById('update-count').textContent = data.application?.updateCount || data.updateCount || 0;
+            document.getElementById('system-uptime').textContent = data.system?.uptime || '0h 0m';
+            document.getElementById('monitor-uptime').textContent = data.application?.monitorUptime || data.monitorUptime || '0h 0m';
+            document.getElementById('process-count').textContent = data.processes?.total || 0;
+            
+            // Update CPU Information
+            const cpuLoad = parseFloat(data.cpu?.load) || 0;
+            document.getElementById('cpu-value').textContent = cpuLoad.toFixed(1) + '%';
+            document.getElementById('cpu-progress').style.width = cpuLoad + '%';
+            document.getElementById('cpu-cores').textContent = data.cpu?.cores || 0;
+            document.getElementById('cpu-user').textContent = (parseFloat(data.cpu?.user) || 0).toFixed(1) + '%';
+            document.getElementById('cpu-system').textContent = (parseFloat(data.cpu?.system) || 0).toFixed(1) + '%';
+            document.getElementById('cpu-temp').textContent = data.cpu?.temperature || 'N/A';
+            
+            // CPU status color
+            const cpuStatus = document.getElementById('cpu-status');
+            if (cpuLoad > 85) {
+                cpuStatus.textContent = 'Critical';
+                cpuStatus.style.color = '#ef233c';
+                document.getElementById('cpu-value').style.color = '#ef233c';
+                
+                // Show notification in Electron
+                if (isElectron && cpuLoad > 90) {
+                    showElectronNotification(`CPU usage critical: ${cpuLoad.toFixed(1)}%`, 'error');
+                }
+            } else if (cpuLoad > 70) {
+                cpuStatus.textContent = 'High';
+                cpuStatus.style.color = '#f72585';
+                document.getElementById('cpu-value').style.color = '#f72585';
+            } else {
+                cpuStatus.textContent = 'Normal';
+                cpuStatus.style.color = '#4cc9f0';
+                document.getElementById('cpu-value').style.color = '#4cc9f0';
+            }
+            
+            // Update CPU cores
+            updateCores(data.cpu?.perCoreLoad || []);
+            
+            // Update Memory Information
+            const memUsage = parseFloat(data.memory?.usage) || 0;
+            document.getElementById('memory-value').textContent = memUsage.toFixed(1) + '%';
+            document.getElementById('memory-progress').style.width = memUsage + '%';
+            document.getElementById('memory-total').textContent = (parseFloat(data.memory?.total) || 0).toFixed(2) + ' GB';
+            document.getElementById('memory-used').textContent = (parseFloat(data.memory?.used) || 0).toFixed(2) + ' GB';
+            document.getElementById('memory-free').textContent = (parseFloat(data.memory?.free) || 0).toFixed(2) + ' GB';
+            document.getElementById('memory-available').textContent = (parseFloat(data.memory?.available) || 0).toFixed(2) + ' GB';
+            
+            // Memory status color
+            const memStatus = document.getElementById('memory-status');
+            if (memUsage > 90) {
+                memStatus.textContent = 'Critical';
+                memStatus.style.color = '#ef233c';
+                document.getElementById('memory-value').style.color = '#ef233c';
+                
+                // Show notification in Electron
+                if (isElectron && memUsage > 90) {
+                    showElectronNotification(`Memory usage critical: ${memUsage.toFixed(1)}%`, 'error');
+                }
+            } else if (memUsage > 80) {
+                memStatus.textContent = 'High';
+                memStatus.style.color = '#f72585';
+                document.getElementById('memory-value').style.color = '#f72585';
+            } else {
+                memStatus.textContent = 'Normal';
+                memStatus.style.color = '#4cc9f0';
+                document.getElementById('memory-value').style.color = '#4cc9f0';
+            }
+            
+            // Update Disk Information
+            const diskUsage = parseFloat(data.disk?.usage) || 0;
+            document.getElementById('disk-value').textContent = diskUsage.toFixed(1) + '%';
+            document.getElementById('disk-progress').style.width = diskUsage + '%';
+            document.getElementById('disk-total').textContent = (parseFloat(data.disk?.total) || 0).toFixed(2) + ' GB';
+            document.getElementById('disk-used').textContent = (parseFloat(data.disk?.used) || 0).toFixed(2) + ' GB';
+            document.getElementById('disk-free').textContent = (parseFloat(data.disk?.free) || 0).toFixed(2) + ' GB';
+            document.getElementById('disk-mount').textContent = data.disk?.mount || '/';
+            
+            // Disk status color
+            const diskStatus = document.getElementById('disk-status');
+            if (diskUsage > 95) {
+                diskStatus.textContent = 'Critical';
+                diskStatus.style.color = '#ef233c';
+                document.getElementById('disk-value').style.color = '#ef233c';
+                
+                // Show notification in Electron
+                if (isElectron && diskUsage > 95) {
+                    showElectronNotification(`Disk usage critical: ${diskUsage.toFixed(1)}%`, 'error');
+                }
+            } else if (diskUsage > 85) {
+                diskStatus.textContent = 'High';
+                diskStatus.style.color = '#f72585';
+                document.getElementById('disk-value').style.color = '#f72585';
+            } else {
+                diskStatus.textContent = 'Normal';
+                diskStatus.style.color = '#4cc9f0';
+                document.getElementById('disk-value').style.color = '#4cc9f0';
+            }
+            
+            // Update Network Information
+            document.getElementById('network-interface').textContent = data.network?.interface || 'N/A';
+            document.getElementById('network-rx').textContent = (parseFloat(data.network?.rx_speed) || 0).toFixed(2) + ' MB/s';
+            document.getElementById('network-tx').textContent = (parseFloat(data.network?.tx_speed) || 0).toFixed(2) + ' MB/s';
+            
+            // Format network totals
+            const rxTotal = data.network?.rx_bytes ? (data.network.rx_bytes / 1024 / 1024).toFixed(2) : '0';
+            const txTotal = data.network?.tx_bytes ? (data.network.tx_bytes / 1024 / 1024).toFixed(2) : '0';
+            document.getElementById('network-rx-total').textContent = rxTotal + ' MB';
+            document.getElementById('network-tx-total').textContent = txTotal + ' MB';
+            
+            // Update Processes Information
+            document.getElementById('process-total').textContent = data.processes?.total || 0;
+            document.getElementById('process-running').textContent = data.processes?.running || 0;
+            document.getElementById('process-sleeping').textContent = data.processes?.sleeping || 0;
+            document.getElementById('last-update').textContent = data.timeLocal || '-';
+            
+            // Update System Information
+            document.getElementById('system-hostname').textContent = data.system?.hostname || '-';
+            document.getElementById('system-os').textContent = (data.system?.distro || '') + ' ' + (data.system?.release || '') || '-';
+            document.getElementById('system-kernel').textContent = data.system?.kernel || '-';
+            document.getElementById('system-arch').textContent = data.system?.arch || '-';
+            document.getElementById('system-platform').textContent = data.system?.platform || '-';
+            
+            // Update last update time
+            document.getElementById('last-update').textContent = new Date().toLocaleTimeString();
+        }
+        
+        function updateCores(cores) {
+            const container = document.getElementById('cores-grid');
+            container.innerHTML = '';
+            
+            cores.forEach(core => {
+                const coreElement = document.createElement('div');
+                coreElement.className = 'core-item';
+                
+                const coreLoad = parseFloat(core.load) || 0;
+                const coreColor = coreLoad > 85 ? '#ef233c' : coreLoad > 70 ? '#f72585' : '#4cc9f0';
+                
+                coreElement.innerHTML = '<div class="core-id">Core ' + core.id + '</div>' +
+                                        '<div class="core-value" style="color: ' + coreColor + '">' + 
+                                        coreLoad.toFixed(1) + '%</div>';
+                
+                container.appendChild(coreElement);
+            });
+        }
+        
+        async function fetchData() {
+            try {
+                if (isElectron && electronAPI) {
+                    // In Electron, request data via IPC
+                    electronAPI.ipcRenderer.send('get-current-data');
+                } else {
+                    // In browser, fetch from API
+                    const response = await fetch('/api/system');
+                    if (!response.ok) throw new Error('API response not OK');
+                    const data = await response.json();
+                    updateDashboard(data);
+                }
+            } catch (error) {
+                console.error('Error fetching data:', error);
+                document.getElementById('cpu-value').textContent = 'Error';
+                document.getElementById('cpu-value').style.color = '#ef233c';
+                showElectronNotification('Error fetching data: ' + error.message, 'error');
+            }
+        }
+        
+        function refreshData() {
+            fetchData();
+        }
+        
+        function toggleAutoRefresh() {
+            autoRefresh = !autoRefresh;
+            const btn = document.getElementById('auto-refresh-btn');
+            
+            if (autoRefresh) {
+                startAutoRefresh();
+                btn.innerHTML = '<i class="fas fa-play-circle"></i> Auto-refresh: ON';
+                btn.style.background = '#4361ee';
+                document.getElementById('auto-refresh-status').textContent = 'ON';
+                showElectronNotification('Auto-refresh enabled', 'success');
+            } else {
+                clearInterval(refreshInterval);
+                btn.innerHTML = '<i class="fas fa-pause-circle"></i> Auto-refresh: OFF';
+                btn.style.background = 'rgba(255, 255, 255, 0.1)';
+                document.getElementById('auto-refresh-status').textContent = 'OFF';
+                showElectronNotification('Auto-refresh disabled', 'warning');
+            }
+        }
+        
+        function startAutoRefresh() {
+            if (refreshInterval) clearInterval(refreshInterval);
+            
+            let countdown = updateFrequency / 1000;
+            refreshInterval = setInterval(() => {
+                countdown--;
+                document.getElementById('next-update').textContent = countdown;
+                
+                if (countdown <= 0) {
+                    fetchData();
+                    countdown = updateFrequency / 1000;
+                }
+            }, 1000);
+            
+            fetchData();
+        }
+        
+        function getCurrentDataForExport() {
+            // This would collect current data from the UI
+            // For now, return a simple object
+            return {
+                timestamp: new Date().toISOString(),
+                cpu: {
+                    load: document.getElementById('cpu-value').textContent,
+                    cores: document.getElementById('cpu-cores').textContent
+                },
+                memory: {
+                    usage: document.getElementById('memory-value').textContent,
+                    total: document.getElementById('memory-total').textContent
+                },
+                disk: {
+                    usage: document.getElementById('disk-value').textContent,
+                    total: document.getElementById('disk-total').textContent
+                }
+            };
+        }
+        
+        function convertToCSV(data) {
+            // Simple CSV conversion
+            const rows = [
+                ['Metric', 'Value'],
+                ['CPU Load', data.cpu.load],
+                ['CPU Cores', data.cpu.cores],
+                ['Memory Usage', data.memory.usage],
+                ['Memory Total', data.memory.total],
+                ['Disk Usage', data.disk.usage],
+                ['Disk Total', data.disk.total],
+                ['Timestamp', data.timestamp]
+            ];
+            
+            return rows.map(row => row.join(',')).join('\n');
+        }
+        
+        // ==================== INITIALIZATION ====================
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('🚀 Dashboard initializing...');
+            
+            // Detect environment
+            detectEnvironment();
+            
+            // Style buttons
+            const buttons = document.querySelectorAll('button');
+            buttons.forEach(btn => {
+                if (!btn.id.includes('minimize') && !btn.id.includes('maximize') && !btn.id.includes('close')) {
+                    btn.style.background = 'var(--primary)';
+                    btn.style.color = 'white';
+                    btn.style.border = 'none';
+                    btn.style.padding = '10px 20px';
+                    btn.style.borderRadius = '8px';
+                    btn.style.cursor = 'pointer';
+                    btn.style.margin = '0 5px';
+                    btn.style.fontSize = '1rem';
+                    btn.style.transition = 'background 0.3s';
+                    
+                    btn.addEventListener('mouseenter', () => {
+                        btn.style.background = 'var(--secondary)';
+                    });
+                    
+                    btn.addEventListener('mouseleave', () => {
+                        btn.style.background = 'var(--primary)';
+                    });
+                }
+            });
+            
+            document.getElementById('auto-refresh-btn').style.background = 'rgba(255, 255, 255, 0.1)';
+            
+            // Start auto-refresh
+            startAutoRefresh();
+            
+            // Add keyboard shortcuts
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'r' || e.key === 'R') refreshData();
+                if (e.key === 'a' || e.key === 'A') toggleAutoRefresh();
+                if (e.key === 'e' || e.key === 'E') electronExport('json');
+                if (e.key === 's' || e.key === 'S') electronShowSettings();
+                if (e.key === 'Escape' && isElectron) {
+                    electronAPI.ipcRenderer.send('window-close');
+                }
+                if (e.key === 'F12' && isElectron) {
+                    electronDevTools();
+                }
+            });
+            
+            console.log('✅ Dashboard initialized successfully');
+            showElectronNotification('Dashboard loaded successfully', 'success');
+        });
+    </script>
+</body>
+</html>
